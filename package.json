@@ -1,0 +1,26 @@
+{
+  "name": "schoolnet-api",
+  "version": "0.0.4",
+  "scripts": {},
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gradecam/nodejs-schoolnet-api"
+  },
+  "keywords": [
+    "schoolnet"
+  ],
+  "license": "MIT",
+  "author": "Jarom Loveridge",
+  "dependencies": {
+    "lodash": "^3.9.1",
+    "log4js": "^0.6.16",
+    "moment": "^2.8.3",
+    "q": "^1.4.1",
+    "restler-q": "git+https://github.com/gradecam/restler-q.git"
+  },
+  "devDependencies": {
+    "commander": "^2.3.0",
+    "embed-shell": "git+https://github.com/gradecam/nodejs-embed-shell.git"
+  }
+}
