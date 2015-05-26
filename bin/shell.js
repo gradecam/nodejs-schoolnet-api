@@ -29,11 +29,6 @@ function embedShell(config) {
         log: log,
         log4js: log4js,
         rest: rest,
-        school: {
-            institutionId: '006b8369-2fd8-48f0-aea3-e3b222e25b25',
-            institutionName: 'Rosebud Elementary School',
-            externalId: '519'
-        }
     };
     require('embed-shell')({context: context, doc: doc, prompt: 'schoolnet> '});
 }
