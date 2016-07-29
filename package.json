@@ -1,6 +1,6 @@
 {
   "name": "schoolnet-api",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "scripts": {},
   "main": "index.js",
   "repository": {
