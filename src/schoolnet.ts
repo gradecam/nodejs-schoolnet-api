@@ -5,7 +5,7 @@ import * as log4js from "log4js";
 import * as P from "bluebird";
 
 const log = log4js.getLogger("schoolnet");
-const rest: any = require("restler-q");
+const rest: any = require("restler-q"); // tslint:disable-line
 
 // This shouldn't be necessary as it should be the default form log4js but it isn't.
 log.setLevel("INFO");
@@ -50,16 +50,14 @@ interface OAuthCredentials {
     scope?: string;
 }
 
-let AUG = 7;
-
 // let BACKOFF = [3000, 1000, 500];
 let BACKOFF = [5 * 60 * 1000, 60 * 1000, 3 * 1000];
 
-function backoff(idx) {
+function backoff(idx: number) {
     let timeout = BACKOFF[idx];
     let dfd = P.defer();
     log.info("Retrying request after:", timeout);
-    setTimeout(function() {
+    setTimeout(() => {
         dfd.resolve(timeout);
     }, timeout);
     return dfd.promise;
@@ -75,48 +73,48 @@ export type StaffIdLike = {id: string} | {staffId: string} | {teacher: string} |
 
 export interface SchoolnetApi {
     constructor(config: any);
-    getAssessments(opts: any): PromiseLike<any>;
+    getAssessments(opts?: any): PromiseLike<any>;
     getAssessment(assessment: any): PromiseLike<any>;
     getAssessment(assessmentOrId: AssessmentIdLike): PromiseLike<any>;
     getDistrincts(): PromiseLike<any>;
-    getSchool(school: SchoolIdLike, opts: any): PromiseLike<any>;
-    getSchools(district: InstitutionIdLike, opts: any): PromiseLike<any>;
+    getSchool(school: SchoolIdLike, opts?: any): PromiseLike<any>;
+    getSchools(district: InstitutionIdLike, opts?: any): PromiseLike<any>;
     getSection(section: SectionIdLike): PromiseLike<any>;
-    getSections(school: InstitutionIdLike, opts): PromiseLike<any>;
-    getStudents(section: SectionIdLike, opts: any): PromiseLike<any>;
+    getSections(school: InstitutionIdLike, opts?: any): PromiseLike<any>;
+    getStudents(section: SectionIdLike, opts?: any): PromiseLike<any>;
     putStudentAssessment(obj: any): PromiseLike<any>;
-    getStaff(obj: StaffIdLike, opts: any): PromiseLike<any>;
+    getStaff(obj: StaffIdLike, opts?: any): PromiseLike<any>;
     getStaffSections(obj: StaffIdLike): PromiseLike<any>;
     getTenants(): PromiseLike<any>;
     setLogLevel(level: string): void;
 }
 
 export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
-    _requestToken: function _requestToken(creds, attemptsRemaining) {
+    _requestToken: function _requestToken(creds: any, attemptsRemaining: number) {
         log.info("Requesting access token...");
         let self = this;
-        return rest.post(self.tokenUrl, {data: creds}).then(function(data) {
+        return rest.post(self.tokenUrl, {data: creds}).then((data: any) => {
             if (_.isEmpty(data.access_token)) {
                 let err: any = new Error("Failed to obtain token.");
                 err.body = data;
                 return P.reject(err);
             }
             return P.resolve({access_token: data.access_token, expires: data.expires_in});
-        }, function(err) {
+        }, (err: any) => {
             if (attemptsRemaining) {
                 attemptsRemaining--;
-                return backoff(attemptsRemaining).then(function() {
+                return backoff(attemptsRemaining).then(() => {
                     return self._requestToken(creds, attemptsRemaining);
                 });
             }
         });
 
     },
-    accessToken: function accessToken(creds) {
+    accessToken: function accessToken(creds: any) {
         let self = this;
         let start = Date.now();
         if (self.expires <= start) {
-            return self._requestToken(creds, 3).then(function(data) {
+            return self._requestToken(creds, 3).then((data: any) => {
                 self.token = data.access_token;
                 self.expires = (start + data.expires * 1000) - 10000;
                 log.info("token obtained in: %dms expires: %d", Date.now() - start, self.expires);
@@ -127,21 +125,21 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
             return P.resolve(self.token);
         }
     },
-    _get: function _get(uri, options, attemptsRemaining) {
+    _get: function _get(uri: string, options: any, attemptsRemaining: number) {
         let self = this;
-        return self.get(uri, options).fail(function(err) {
+        return self.get(uri, options).fail((err: any) => {
             let retryCode = _.includes(RETRY_CODES, err.code);
             log.error("Request failed with error:", err);
             if (!(retryCode && attemptsRemaining)) {
                 return P.reject(err);
             }
             attemptsRemaining--;
-            return backoff(attemptsRemaining).then(function() {
+            return backoff(attemptsRemaining).then(() => {
                 return self._get(uri, options, attemptsRemaining);
             });
         });
     },
-    apiGet: function apiGet(path, options, recursive) {
+    apiGet: function apiGet(path: string, options: any, recursive: boolean) {
         let self = this;
         options = _.extend({query: {}}, options || {});
         log.debug("apiGet:", {path: path, options: options, recursive: recursive});
@@ -161,46 +159,42 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
                 options.query.offset = DEFAULTS.offset;
             }
         }
-        return self.accessToken(self.oauthCreds).then(function(token) {
+        return self.accessToken(self.oauthCreds).then((token: string) => {
             let opts = _.extend({}, options, {accessToken: token});
             log.debug("requesting:", {path: path, opts: opts});
-            return self._get(path, opts, MAX_RETRIES).then(function(data) {
+            return self._get(path, opts, MAX_RETRIES).then((data: any) => {
                 data = data.data || {};
                 if (_.isArray(data)) {
-                    data = _.map(data, function(obj) {
-                        return self.trimObj(obj, self.omissions);
-                    });
+                    data = data.map((obj: any) => self.trimOjb(obj, self.omissions));
                 } else {
                     data = self.trimObj(data, self.omissions);
                 }
                 return data;
             });
-        }).then(function(data) {
+        }).then((data: any) => {
             if (!recursive || !_.isArray(data) || data.length < options.query.limit) {
                 return data;
             }
             let limit = options.query.limit;
             let offset = options.query.offset += limit;
             log.debug("requesting next page", {limit: limit, offset: offset, options: options});
-            return P.resolve(self.apiGet(path, options, recursive)).then(function(results) {
-                _.each(results, function(result) {
+            return P.resolve(self.apiGet(path, options, recursive)).then((results: any) => {
+                _.each(results, (result: any) => {
                     data.push(result);
                 });
                 return data;
             });
         });
     },
-    apiPut: function apiPut(path, payload, options) {
+    apiPut: function apiPut(path: string, payload: any, options: any) {
         let self = this;
-        return self.accessToken(self.oauthCreds).then(function(token) {
+        return self.accessToken(self.oauthCreds).then((token: string) => {
             let opts = _.extend({}, options || {}, {accessToken: token});
             log.debug("putting:", {path: path, opts: opts});
-            return self.putJson(path, payload, opts).then(function(data) {
+            return self.putJson(path, payload, opts).then((data: any) => {
                 data = data.data || {};
                 if (_.isArray(data)) {
-                    data = _.map(data, function(obj) {
-                        return self.trimObj(obj, self.omissions);
-                    });
+                    data = data.map((obj: any) => self.trimObj(obj, self.omissions));
                 } else {
                     data = self.trimObj(data, self.omissions);
                 }
@@ -208,7 +202,7 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
             });
        });
     },
-    trimObj: function trimObj(obj, omissions) {
+    trimObj: function trimObj(obj: any, omissions: any) {
         obj = _.omit(obj, omissions);
         return obj;
     },
@@ -217,10 +211,10 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
      *
      * @param opts object the options to use when retrieving the list of assessments.
      *                       default options: {limit: 100, offset: 0}
-     **/
-    getAssessments: function getAssessments(opts: any): PromiseLike<any> {
+     */
+    getAssessments: function getAssessments(optsAny: any = null): PromiseLike<any> {
         let self = this;
-        return P.resolve(opts).then(function(opts) {
+        return P.resolve(optsAny).then((opts: any) => {
             opts = opts || {};
             let options = {
                 query: {
@@ -232,16 +226,14 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
                 options.query.filter = "modifiedsince==" + date + ";" + options.query.filter;
             }
             options = _.extend(options, _.pick(opts, "limit", "offset"));
-            return self.apiGet("assessments", options).then(function(alist) {
-                return _.filter(alist, function(x: any) {
-                    return x.instanceId;
-                });
+            return self.apiGet("assessments", options).then((alist: any[]) => {
+                return (alist || []).filter(x => x.instanceId);
             });
         });
     },
-    getAssessment: function getAssessment(assessmentOrId: AssessmentIdLike): PromiseLike<any> {
+    getAssessment: function getAssessment(objOrId: AssessmentIdLike): PromiseLike<any> {
         let self = this;
-        return P.resolve(assessmentOrId).then(function(assessmentOrId: AssessmentIdLike) {
+        return P.resolve(objOrId).then(function(assessmentOrId: AssessmentIdLike) {
             let opts = {
                 query: {
                     expand: "assessmentquestion,assessmentschedule",
@@ -255,9 +247,9 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
     getDistricts: function getDistrincts(): PromiseLike<any> {
         return this.apiGet("districts");
     },
-    getSchool: function getSchool(school: SchoolIdLike, opts: any): PromiseLike<any> {
+    getSchool: function getSchool(obj: SchoolIdLike, optsAny: any = null): PromiseLike<any> {
         let self = this;
-        return P.all([school, opts]).then(function(args) {
+        return P.all([obj, optsAny]).then((args: any) => {
             let school: any = args[0];
             let opts: any = args[1];
             let schoolId: string = school.id || school.institutionId || school;
@@ -265,26 +257,26 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
             return self.apiGet("schools/" + schoolId, opts);
         });
     },
-    getSchools: function getSchools(district: InstitutionIdLike, opts: any): PromiseLike<any> {
+    getSchools: function getSchools(districtAny: InstitutionIdLike, optsAny: any = null): PromiseLike<any> {
         let self = this;
-        return P.all([district, opts]).then(function(args) {
+        return P.all([districtAny, optsAny]).then((args: any) => {
             let district: any = args[0];
             let opts: any = args[1];
-            let district_id: string = district.id || district.institutionId || district;
-            return self.apiGet("districts/" + district_id + "/schools", opts);
+            let districtId: string = district.id || district.institutionId || district;
+            return self.apiGet("districts/" + districtId + "/schools", opts);
         });
     },
-    getSection: function getSection(section: SectionIdLike): PromiseLike<any> {
+    getSection: function getSection(obj: SectionIdLike): PromiseLike<any> {
         let self = this;
-        return P.resolve(section).then(function(section: any) {
+        return P.resolve(obj).then((section: any) => {
             let sectionId = section.id || section.sectionId || section;
             let opts = {query: {expand: "assessmentassignment,course,schedule"}};
             return self.apiGet("sections/" + sectionId, opts);
         });
     },
-    getSections: function getSections(school: InstitutionIdLike, opts): PromiseLike<any> {
+    getSections: function getSections(obj: InstitutionIdLike, optsAny: any = null): PromiseLike<any> {
         let self = this;
-        return P.all([school, opts]).then(function(args) {
+        return P.all([obj, optsAny]).then((args: any) => {
             let school: any = args[0];
             let opts: any = args[1];
             let schoolId: string = school.id || school.institutionId || school;
@@ -292,9 +284,9 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
         });
     },
 
-    getStudents: function getStudents(section: SectionIdLike, opts: any): PromiseLike<any> {
+    getStudents: function getStudents(obj: SectionIdLike, optsAny: any = null): PromiseLike<any> {
         let self = this;
-        return P.all([section, opts]).then(function(args) {
+        return P.all([obj, optsAny]).then((args: any) => {
             let section: any = args[0];
             let opts: any = args[1];
             let sectionId: string = section.id || section.sectionId || section;
@@ -302,52 +294,45 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
             return self.apiGet("sections/" + sectionId + "/students", opts);
         });
     },
-    putStudentAssessment: function putStudentAssessment(obj: any): PromiseLike<any> {
+    putStudentAssessment: function putStudentAssessment(studentAssessment: any): PromiseLike<any> {
         let self = this;
-        return P.resolve(obj).then(function(obj) {
+        return P.resolve(studentAssessment).then((obj: any) => {
             if (!obj || !obj.assessmentId) {
                 log.error("putStudentAssessment: Invalid asssessment: ", obj);
                 return {success: false};
             }
 
             let url = "assessments/" + obj.assessmentId + "/studentAssessments";
-            return self.apiPut(url, obj).then(function() {
-                return _.extend({success: true}, obj);
-            }, function(err, response) {
-                let dfd = P.defer();
+            return self.apiPut(url, obj).then(() => _.extend({success: true}, obj),
+            (err: any, response: any) => {
                 if (err && err.stack) {
                     log.error("putStudentAssessment:", response, err.stack);
                 } else {
                     log.warn("putStudentAssessment:", err, response);
                 }
-                dfd.resolve(_.extend({success: false}, obj, err));
-                return dfd.promise;
+                return _.extend({success: false}, obj, err);
             });
         });
     },
-    getStaff: function getStaff(obj: StaffIdLike, opts: any): PromiseLike<any> {
+    getStaff: function getStaff(obj: StaffIdLike, opts: any = null): PromiseLike<any> {
         let self = this;
-        return P.all([obj, opts]).then(function(args) {
-            let obj: any = args[0];
-            let opts: any = args[1];
-            let staffId: string = obj.staffId || obj.teacher || obj.id || obj;
-            opts = _.extend(opts || {}, {query: {expand: "identifier"}});
+        return P.all([obj, opts]).spread((objAny: any, optsAny: any) => {
+            let staffId: string = objAny.staffId || objAny.teacher || objAny.id || objAny;
+            opts = _.extend(optsAny || {}, {query: {expand: "identifier"}});
             return self.apiGet("staff/" + staffId, opts);
         });
     },
     getStaffSections: function getStaffSections(obj: StaffIdLike): PromiseLike<any> {
         let self = this;
-        return P.resolve(obj).then(function(obj: any) {
-            let staffId: string = obj.staffId || obj.teacher || obj.id || obj;
+        return P.resolve(obj).then((objAny: any) => {
+            let staffId: string = objAny.staffId || objAny.teacher || objAny.id || objAny;
             return self.apiGet("staff/" + staffId + "/staffSectionAssignments");
         });
     },
     getTenants: function getTenants(): PromiseLike<any> {
         let self = this;
-        return self.get("tenants").then(function(data) {
-            return _.map(data.data, function(data) {
-                return self.trimObj(data, self.omissions);
-            });
+        return self.get("tenants").then((data) => {
+            return data.data.map((x: any) => self.trimObj(x, self.omissions));
         });
     },
     setLogLevel: function setLogLevel(level: string) {
