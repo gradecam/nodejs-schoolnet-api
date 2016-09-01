@@ -17,7 +17,7 @@ let DEFAULTS = {
 
 let MAX_RETRIES = 3;
 
-class SchoolnetApiBase {
+export class SchoolnetApi {
     baseURL: string;
     tokenUrl: string;
     token: string;
@@ -43,7 +43,7 @@ class SchoolnetApiBase {
     }
 }
 
-interface OAuthCredentials {
+export interface OAuthCredentials {
     client_id: string;
     client_secret: string;
     grant_type: string;
@@ -71,12 +71,12 @@ export type SchoolIdLike = {id: string} | {institutionId: string} | string;
 export type SectionIdLike = {id: string} | {sectionId: string} | string;
 export type StaffIdLike = {id: string} | {staffId: string} | {teacher: string} | string;
 
-export interface SchoolnetApi {
+export interface ISchoolnetApi {
     constructor(config: any);
     getAssessments(opts?: any): PromiseLike<any>;
     getAssessment(assessment: any): PromiseLike<any>;
     getAssessment(assessmentOrId: AssessmentIdLike): PromiseLike<any>;
-    getDistrincts(): PromiseLike<any>;
+    getDistricts(): PromiseLike<any>;
     getSchool(school: SchoolIdLike, opts?: any): PromiseLike<any>;
     getSchools(district: InstitutionIdLike, opts?: any): PromiseLike<any>;
     getSection(section: SectionIdLike): PromiseLike<any>;
@@ -89,7 +89,7 @@ export interface SchoolnetApi {
     setLogLevel(level: string): void;
 }
 
-export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
+rest.service(SchoolnetApi, {}, {
     _requestToken: function _requestToken(creds: any, attemptsRemaining: number) {
         log.info("Requesting access token...");
         let self = this;
@@ -165,7 +165,7 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
             return self._get(path, opts, MAX_RETRIES).then((data: any) => {
                 data = data.data || {};
                 if (_.isArray(data)) {
-                    data = data.map((obj: any) => self.trimOjb(obj, self.omissions));
+                    data = data.map((obj: any) => self.trimObj(obj, self.omissions));
                 } else {
                     data = self.trimObj(data, self.omissions);
                 }
@@ -244,7 +244,7 @@ export const SchoolnetApi: SchoolnetApi = rest.service(SchoolnetApiBase, {}, {
             return self.apiGet("assessments/" + id, opts);
         });
     },
-    getDistricts: function getDistrincts(): PromiseLike<any> {
+    getDistricts: function getDistricts(): PromiseLike<any> {
         return this.apiGet("districts");
     },
     getSchool: function getSchool(obj: SchoolIdLike, optsAny: any = null): PromiseLike<any> {
