@@ -1,8 +1,11 @@
 {
   "name": "schoolnet-api",
-  "version": "0.2.2",
-  "scripts": {},
-  "main": "index.js",
+  "version": "1.1.0",
+  "scripts": {
+    "prepublish": "./scripts/transpile"
+  },
+  "main": "dist/schoolnet.js",
+  "typings": "dist/schoolnet",
   "repository": {
     "type": "git",
     "url": "https://github.com/gradecam/nodejs-schoolnet-api"
@@ -12,14 +15,22 @@
   ],
   "license": "MIT",
   "author": "Jarom Loveridge",
+  "files": [
+    "dist/"
+  ],
   "dependencies": {
-    "lodash": "^3.9.1",
+    "bluebird": "^3.4.3",
+    "lodash": "4.15.0",
     "log4js": "^0.6.16",
-    "moment": "^2.8.3",
-    "q": "^1.4.1",
+    "moment": "2.14.1",
     "restler-q": "git+https://github.com/gradecam/restler-q.git"
   },
   "devDependencies": {
+    "@types/bluebird": "^3.0.32",
+    "@types/lodash": "^4.14.34",
+    "@types/log4js": "0.0.30",
+    "@types/moment": "^2.13.0",
+    "@types/node": "^6.0.38",
     "commander": "^2.3.0",
     "embed-shell": "git+https://github.com/gradecam/nodejs-embed-shell.git"
   }

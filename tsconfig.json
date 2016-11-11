@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "inlineSourceMap": true,
+        "module": "commonjs",
+        "noImplicitAny": false,
+        "outDir": "dist",
+        "preserveConstEnums": true,
+        "removeComments": false,
+        "target": "es5"
+    },
+    "files": [
+        "./src/schoolnet.ts"
+    ]
+}
