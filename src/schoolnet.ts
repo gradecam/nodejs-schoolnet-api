@@ -303,15 +303,21 @@ rest.service(SchoolnetApi, {}, {
             }
 
             let url = "assessments/" + obj.assessmentId + "/studentAssessments";
-            return self.apiPut(url, obj).then(() => _.extend({success: true}, obj),
-            (err: any, response: any) => {
-                if (err && err.stack) {
-                    log.error("putStudentAssessment:", response, err.stack);
-                } else {
-                    log.warn("putStudentAssessment:", err, response);
-                }
-                return _.extend({success: false}, obj, err);
-            });
+            return self.apiPut(url, obj)
+                .then(
+                    () => _.extend({success: true}, obj),
+                    (err: any, response: any) => {
+                        if (err && err.stack) {
+                            log.error("putStudentAssessment:", response, err.stack);
+                        }
+                        log.warn("putStudentAssessment:", JSON.stringify({
+                            body: studentAssessment,
+                            error: err,
+                            response: response,
+                        }));
+                        return _.extend({success: false}, obj, err);
+                    }
+                );
         });
     },
     getStaff: function getStaff(obj: StaffIdLike, opts: any = null): PromiseLike<any> {
