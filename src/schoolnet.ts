@@ -5,7 +5,7 @@ import * as log4js from "log4js";
 import * as P from "bluebird";
 
 const log = log4js.getLogger("schoolnet");
-const rest: any = require("restler-q"); // tslint:disable-line
+const rest: any = require("@gradecam/restler-q"); // tslint:disable-line
 
 // This shouldn't be necessary as it should be the default form log4js but it isn't.
 log.setLevel("INFO");

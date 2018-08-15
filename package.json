@@ -19,11 +19,11 @@
     "dist/"
   ],
   "dependencies": {
+    "@gradecam/restler-q": "^0.2.0",
     "bluebird": "^3.4.3",
     "lodash": "4.15.0",
     "log4js": "^0.6.16",
-    "moment": "2.14.1",
-    "restler-q": "git+https://github.com/gradecam/restler-q.git"
+    "moment": "2.14.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.32",
