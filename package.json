@@ -2,7 +2,8 @@
   "name": "schoolnet-api",
   "version": "1.2.0",
   "scripts": {
-    "prepublish": "./scripts/transpile"
+    "build": "rimraf dist && tsc -p .",
+    "prepublish": "npm run build"
   },
   "main": "dist/schoolnet.js",
   "typings": "dist/schoolnet",
@@ -32,6 +33,8 @@
     "@types/moment": "^2.13.0",
     "@types/node": "^6.0.38",
     "commander": "^2.3.0",
-    "embed-shell": "git+https://github.com/gradecam/nodejs-embed-shell.git"
+    "embed-shell": "git+https://github.com/gradecam/nodejs-embed-shell.git",
+    "rimraf": "^2.6.2",
+    "typescript": "^3.0.3"
   }
 }

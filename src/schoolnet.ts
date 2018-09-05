@@ -39,7 +39,11 @@ export class SchoolnetApi {
         this.token = void(0);
         this.expires = 0;
         this.omissions = ["links", "institutionType"];
-        this.oauthCreds = _.omit(creds, _.isEmpty) as OAuthCredentials;
+        for (const key of Object.keys(creds)) {
+            if (creds[key]) { continue; }
+            delete creds[key];
+        }
+        this.oauthCreds = creds;
     }
 }
 
