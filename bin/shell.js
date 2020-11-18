@@ -7,7 +7,7 @@ var fs = require('fs');
 var log4js = require('log4js');
 var rest   = require('@gradecam/restler-q');
 
-var Api = require('../lib/schoolnet');
+var Api = require('../dist/schoolnet');
 
 var log = log4js.getLogger('schoolnet');
 
