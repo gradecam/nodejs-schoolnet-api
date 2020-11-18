@@ -9,6 +9,7 @@
         "outDir": "dist",
         "preserveConstEnums": true,
         "removeComments": false,
+        "skipLibCheck": true,
         "target": "es5"
     },
     "files": [
