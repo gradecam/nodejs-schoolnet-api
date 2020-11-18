@@ -22,16 +22,15 @@
   "dependencies": {
     "@gradecam/restler-q": "^0.2.0",
     "bluebird": "^3.4.3",
-    "lodash": "4.15.0",
+    "lodash": "^4.17.20",
     "log4js": "^0.6.16",
-    "moment": "2.14.1"
+    "moment": "^2.29.1"
   },
   "devDependencies": {
     "@types/bluebird": "^3.0.32",
-    "@types/lodash": "^4.14.34",
+    "@types/lodash": "^4.14.165",
     "@types/log4js": "0.0.30",
-    "@types/moment": "^2.13.0",
-    "@types/node": "^6.0.38",
+    "@types/node": "^14.14.8",
     "commander": "^2.3.0",
     "embed-shell": "git+https://github.com/gradecam/nodejs-embed-shell.git",
     "rimraf": "^2.6.2",
