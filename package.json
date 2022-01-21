@@ -23,7 +23,7 @@
     "@gradecam/restler-q": "^0.2.0",
     "bluebird": "^3.4.3",
     "lodash": "^4.17.20",
-    "log4js": "^0.6.16",
+    "log4js": "^6.4.0",
     "moment": "^2.29.1"
   },
   "devDependencies": {
